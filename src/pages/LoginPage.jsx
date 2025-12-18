@@ -48,7 +48,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E4FFCC] via-[#f3f8eba3] to-[#FFDAB0] flex justify-center items-center p-4">
+    <div className="min-h-screen bg-white flex justify-center items-center p-4">
       {/* Main Container */}
       <div className="w-full max-w-md">
         
@@ -163,12 +163,6 @@ export default function LoginPage() {
               © 2025 Drop Me. All rights reserved.
             </p>
           </div>
-        </div>
-
-        {/* Alternative Info Box */}
-        <div className="mt-6 text-center text-sm text-gray-600">
-          <p className="mb-2">📍 Production Environment</p>
-          <p className="text-xs text-gray-500">API: dropme.up.railway.app</p>
         </div>
       </div>
     </div>

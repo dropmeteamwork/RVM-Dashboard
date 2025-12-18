@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import MachineCard from "../components/MachineCard";
 import { getMachineMetrics } from "../services/api";
+import MachineCapacityGauge from "../components/Charts/MachineCapacityGauge";
+import MachineHealthOverview from "../components/Charts/MachineHealthOverview";
+import MachineCollectionPerformance from "../components/Charts/MachineCollectionPerformance";
 
 export default function MachinePage() {
   const [data, setData] = useState(null);
@@ -95,6 +98,36 @@ export default function MachinePage() {
         {/* Machines Tab */}
         {activeTab === "machines" && (
           <div className="p-6">
+            {/* Charts Section */}
+            <div className="mb-8 space-y-6">
+              {/* Machine Health Overview */}
+              {data && data.length > 0 && (
+                <MachineHealthOverview machines={data} />
+              )}
+
+              {/* Collection Performance */}
+              {data && data.length > 0 && (
+                <MachineCollectionPerformance machines={data} />
+              )}
+
+              {/* Individual Capacity Gauges */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {data && data.length > 0 && data.map((machine, idx) => (
+                  <MachineCapacityGauge
+                    key={idx}
+                    machineName={machine.name}
+                    cansCapacity={machine.cans_capacity}
+                    bottlesCapacity={machine.bottles_capacity}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Machines Table */}
+            <div className="mb-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">All Machines</h3>
+            </div>
+            
             <div className="flex mb-6">
               <input
                 type="search"
