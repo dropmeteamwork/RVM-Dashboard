@@ -64,15 +64,7 @@ export default function UserAnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Gender Distribution */}
         {data?.gender_distribution && (
-          <>
-            <UserGenderDistributionChart genderData={data.gender_distribution} />
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm font-semibold text-blue-900 mb-2">Debug Info:</p>
-              <p className="text-xs text-blue-700 font-mono">
-                {JSON.stringify(data.gender_distribution, null, 2)}
-              </p>
-            </div>
-          </>
+          <UserGenderDistributionChart genderData={data.gender_distribution} />
         )}
 
         {/* Age Distribution */}

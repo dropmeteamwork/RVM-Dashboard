@@ -24,8 +24,8 @@ const UserDemographicsSummary = ({ data }) => {
 
   // Parse gender distribution
   const genderData = data?.gender_distribution || {};
-  const malePercentage = typeof genderData.male === 'string' ? parseFloat(genderData.male) : 0;
-  const femalePercentage = typeof genderData.female === 'string' ? parseFloat(genderData.female) : 0;
+  const malePercentage = typeof genderData.male_percentage === 'string' ? parseFloat(genderData.male_percentage) : 0;
+  const femalePercentage = typeof genderData.female_percentage === 'string' ? parseFloat(genderData.female_percentage) : 0;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

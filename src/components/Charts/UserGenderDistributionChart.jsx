@@ -2,32 +2,14 @@ import React from 'react';
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 
 const UserGenderDistributionChart = ({ genderData }) => {
-  // Debug: Log the actual data structure
-  console.log('Gender Data received:', genderData);
-  console.log('Gender Data type:', typeof genderData);
-  console.log('Gender Data keys:', genderData ? Object.keys(genderData) : 'null');
-
-  // Parse gender data - check all possible variations
-  let malePercentage = 0;
-  let femalePercentage = 0;
-
-  if (genderData) {
-    // Try different possible keys
-    if (genderData.male !== undefined) {
-      malePercentage = typeof genderData.male === 'string' 
-        ? parseFloat(genderData.male) 
-        : genderData.male;
-    }
-    
-    if (genderData.female !== undefined) {
-      femalePercentage = typeof genderData.female === 'string' 
-        ? parseFloat(genderData.female) 
-        : genderData.female;
-    }
-  }
-
-  console.log('Parsed Male:', malePercentage);
-  console.log('Parsed Female:', femalePercentage);
+  // The API returns: { "male_percentage": "1.7%", "female_percentage": "0.1%" }
+  const malePercentage = typeof genderData?.male_percentage === 'string' 
+    ? parseFloat(genderData.male_percentage) 
+    : genderData?.male_percentage || 0;
+  
+  const femalePercentage = typeof genderData?.female_percentage === 'string' 
+    ? parseFloat(genderData.female_percentage) 
+    : genderData?.female_percentage || 0;
 
   // Prepare data for pie chart
   const data = [
@@ -79,7 +61,7 @@ const UserGenderDistributionChart = ({ genderData }) => {
           </ResponsiveContainer>
         ) : (
           <div className="flex items-center justify-center h-full text-gray-500">
-            <p>No gender data available (Male: {malePercentage}, Female: {femalePercentage})</p>
+            <p>No gender data available</p>
           </div>
         )}
       </div>
