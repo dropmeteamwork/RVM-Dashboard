@@ -4,7 +4,7 @@ import ReferralCard from "../components/ReferralCard";
 import VoucherCard from "../components/VoucherCard";
 import AnalyticsCard from "../components/AnalyticsCard";
 import UserTransaction from "../components/UserTransaction";
-import api from "../services/api";
+import { getTransactionAnalytics } from "../services/api";
 import PointsVsCouponsChart from "../components/Charts/PointsVsCouponsChart";
 
 export default function TransactionPage() {
@@ -18,7 +18,7 @@ export default function TransactionPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get(`analytics/transactions/?months=${months}`);
+        const response = await getTransactionAnalytics();
         console.log(response.data);
 
         setData(response.data);

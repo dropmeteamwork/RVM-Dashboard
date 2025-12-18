@@ -52,7 +52,7 @@ export default function NavBar() {
 
   return (
     <>
-      <div className="navbar bg-base-100 shadow-sm px-4">
+      <div className="fixed top-0 left-0 right-0 navbar bg-base-100 shadow-sm px-4 z-50">
         <div className="flex-1 flex items-center gap-4">
           <img src={dropmeLogo} alt="dropme logo" className="w-24 md:w-32" />
           <span className="hidden lg:block text-sm lg:text-base text-gray-600">

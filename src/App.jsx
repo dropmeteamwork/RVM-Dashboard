@@ -11,6 +11,10 @@ import TransactionPage from "./pages/TransactionPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import ReportPage from "./pages/ReportPage";
 import LoginPage from "./pages/LoginPage";
+import CompliancePage from "./pages/CompliancePage";
+import PredictiveMaintenancePage from "./pages/PredictiveMaintenancePage";
+import DataRightsPage from "./pages/DataRightsPage";
+import ReportsPage from "./pages/ReportsPage";
 
 // export default function App() {
 //   return (
@@ -45,8 +49,8 @@ export default function App() {
         element={
           <>
             <NavBar />
-            <div className="p-6 min-h-screen bg-gray-50">
-              <SecondaryNav />
+            <SecondaryNav />
+            <div className="ml-56 p-6 pt-24 min-h-screen bg-gray-50">
               <Outlet/>
             </div>
           </>
@@ -58,6 +62,10 @@ export default function App() {
         <Route path="machines" element={<MachinePage />} />
         <Route path="analytics" element={<AnalyticsPage />} />
         <Route path="transaction" element={<TransactionPage />} />
+        <Route path="compliance" element={<CompliancePage />} />
+        <Route path="predictive-maintenance" element={<PredictiveMaintenancePage />} />
+        <Route path="data-rights" element={<DataRightsPage />} />
+        <Route path="reports" element={<ReportsPage />} />
       </Route>
     </Routes>
   );

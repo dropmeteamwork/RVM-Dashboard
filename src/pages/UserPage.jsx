@@ -1,94 +1,21 @@
 import React, { useEffect, useState } from "react";
 import AnalyticsCard from "../components/AnalyticsCard";
 import UserCard from "../components/UserCard";
-import axios from "axios";
+import { getUserAnalytics } from "../services/api";
 import UserRetentionChart from "../components/Charts/UserRetentionChart";
-import api from "../services/api";
 
 export default function UserPage({ className }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("users");
   const [filteredUsers, setFilteredUsers] = useState([]);
-    const [months, setMonths] = useState(6);
-  
-
-  // useEffect(() => {
-  //   const fetchWithRetry = async () => {
-  //     const accessToken = localStorage.getItem("access_token");
-  //     const refreshToken = localStorage.getItem("refresh_token");
-
-  //     if (!accessToken || !refreshToken) {
-  //       setError("Please log in again. Tokens are missing.");
-  //       setLoading(false);
-  //       return;
-  //     }
-
-  //     const getApiData = async (token) => {
-  //       return await axios.get(
-  //         "https://web-testing-3a06.up.railway.app/dashboard/v2/analytics/user-data/",
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-  //     };
-
-  //     const refreshTokens = async () => {
-  //       try {
-  //         const response = await axios.post(
-  //           "https://web-testing-3a06.up.railway.app/dashboard/v2/auth/token/refresh/",
-  //           {
-  //             refresh: refreshToken,
-  //           }
-  //         );
-  //         const newAccessToken = response.data.access;
-  //         localStorage.setItem("access_token", newAccessToken);
-  //         return newAccessToken;
-  //       } catch (refreshErr) {
-  //         console.error("Failed to refresh token:", refreshErr);
-  //         setError("Session expired. Please log in again.");
-  //         localStorage.removeItem("access_token");
-  //         localStorage.removeItem("refresh_token");
-  //         throw refreshErr;
-  //       }
-  //     };
-
-  //     try {
-  //       const response = await getApiData(accessToken);
-  //       console.log(response.data);
-
-  //       setData(response.data);
-  //     } catch (err) {
-  //       if (axios.isAxiosError(err) && err.response?.status === 401) {
-  //         try {
-  //           const newAccessToken = await refreshTokens();
-  //           const retryResponse = await getApiData(newAccessToken);
-  //           setData(retryResponse.data);
-  //         } catch (retryErr) {
-  //           setLoading(false);
-  //           return;
-  //         }
-  //       } else {
-  //         setError(
-  //           err.response?.data?.detail ||
-  //             err.message ||
-  //             "A network or server error occurred."
-  //         );
-  //       }
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchWithRetry();
-  // }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get(`analytics/user-data/?weeks=${months}`);
+        const response = await getUserAnalytics();
         setData(response.data);
         console.log(response.data);
       } catch (err) {
@@ -102,9 +29,8 @@ export default function UserPage({ className }) {
       }
     };
     fetchData();
-  }, [months]);
+  }, []);
 
-  // Effect to filter users whenever the search term or data changes
   useEffect(() => {
     if (data) {
       const filtered = data.user_details.filter((user) =>
@@ -131,96 +57,138 @@ export default function UserPage({ className }) {
   }
 
   return (
-    <div className="">
-      <div className={`${className} card bg-base-100 shadow-sm`}>
-        <div className="card-body">
-          <div className="pb-5 flex flex-col md:flex-row gap-4 md:justify-between">
-            <div>
-              <h2 className="font-semibold text-xl mb-2">User Database</h2>
-              <p className="text-gray-500">Manage and monitor user accounts</p>
-            </div>
-            <div className="max-w-[260px] self-end ">
-              <label className="input">
-                <svg
-                  className="h-[1em] opacity-50"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                >
-                  <g
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                    strokeWidth="2.5"
-                    fill="none"
-                    stroke="currentColor"
-                  >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.3-4.3"></path>
-                  </g>
-                </svg>
-                <input
-                  type="search"
-                  className="grow"
-                  placeholder="Search by username"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </label>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-6 ">
-            {/* Display filtered users instead of all users */}
-            {filteredUsers.length > 0 ? (
-              filteredUsers.map((data, index) => (
-                <UserCard
-                  key={index}
-                  userName={data.username}
-                  userEmail={data.email}
-                  userNumber={data.phone}
-                  active={data.active}
-                  userAge={data.age}
-                  userPoints={data.total_points}
-                  referral={data.referrals}
-                  totalItems={data.total_items}
-                  joined={data.joined}
-                />
-              ))
-            ) : (
-              <p className="text-center text-gray-500">No users found.</p>
-            )}
-          </div>
+    <div>
+      {/* Header */}
+      <div className="mb-6 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
+          <p className="text-gray-600 mt-1">Manage users and consent preferences</p>
         </div>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2">
+          + Add User
+        </button>
       </div>
-      <div className="mt-6 grid grid-cols-1 items-start lg:grid-cols-2 gap-4">
-        <AnalyticsCard
-          title="User Retention Trends"
-          subTitle="Weekly retention rate over time"
-        >
-           <div className="flex gap-4 mb-4">
-            <button
-              onClick={() => setMonths(6)}
-              className={`px-3 py-1 cursor-pointer rounded ${
-                months === 6 ? "bg-primary-color  text-white" : "bg-gray-200"
-              }`}
-            >
-              Last 6 weeks
-            </button>
-            <button
-              onClick={() => setMonths(12)}
-              className={`px-3 py-1 cursor-pointer rounded ${
-                months === 12 ? "bg-primary-color  text-white" : "bg-gray-200"
-              }`}
-            >
-              Last 12 weeks
-            </button>
+
+      {/* Tabs */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div className="flex border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab("users")}
+            className={`flex-1 py-4 px-6 font-medium text-center transition ${
+              activeTab === "users"
+                ? "text-gray-900 border-b-2 border-blue-600"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Users
+          </button>
+          <button
+            onClick={() => setActiveTab("consent")}
+            className={`flex-1 py-4 px-6 font-medium text-center transition ${
+              activeTab === "consent"
+                ? "text-gray-900 border-b-2 border-blue-600"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Consent Management
+          </button>
+        </div>
+
+        {/* Users Tab */}
+        {activeTab === "users" && (
+          <div className="p-6">
+            <div className="flex mb-6">
+              <input
+                type="search"
+                placeholder="Search users..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Users Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Email</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Name</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Role</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Status</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Join Date</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUsers.length > 0 ? (
+                    filteredUsers.map((user, index) => (
+                      <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition">
+                        <td className="py-4 px-4 text-gray-900">{user.email}</td>
+                        <td className="py-4 px-4 text-gray-900">{user.username}</td>
+                        <td className="py-4 px-4">
+                          <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm font-medium">
+                            User
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className={`px-3 py-1 rounded text-sm font-medium ${
+                            user.active
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}>
+                            {user.active ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4 text-gray-600">{user.joined}</td>
+                        <td className="py-4 px-4 flex gap-2">
+                          <button className="text-blue-600 hover:text-blue-800 transition">✏️</button>
+                          <button className="text-red-600 hover:text-red-800 transition">🗑️</button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="text-center py-8 text-gray-500">
+                        No users found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-          {data.user_retension_data ? (
-            <UserRetentionChart
-              user_retension_data={data.user_retension_data}
-            />
-          ) : (
-            <p>No data saved</p>
-          )}{" "}
-        </AnalyticsCard>
+        )}
+
+        {/* Consent Management Tab */}
+        {activeTab === "consent" && (
+          <div className="p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Consent Management</h3>
+            <div className="space-y-4">
+              <div className="p-4 border border-gray-200 rounded-lg flex items-center justify-between">
+                <div>
+                  <h4 className="font-semibold text-gray-900">Marketing Communications</h4>
+                  <p className="text-sm text-gray-600">Users who have opted in</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-blue-600">{filteredUsers.filter(u => u.active).length}</p>
+                  <p className="text-sm text-gray-500">Active</p>
+                </div>
+              </div>
+
+              <div className="p-4 border border-gray-200 rounded-lg flex items-center justify-between">
+                <div>
+                  <h4 className="font-semibold text-gray-900">Data Processing</h4>
+                  <p className="text-sm text-gray-600">Users who have consented</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-green-600">{filteredUsers.length}</p>
+                  <p className="text-sm text-gray-500">Consented</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

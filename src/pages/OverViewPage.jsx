@@ -3,7 +3,7 @@ import StatusCard from "../components/StatusCard";
 import MetricsCard from "../components/MetricsCard";
 import AnalyticsCard from "../components/AnalyticsCard";
 import AlertCard from "../components/AlertCard";
-import api from "../services/api";
+import { getOverviewMetrics } from "../services/api";
 import NetworkPerformanceChart from "../components/Charts/NetworkPerformanceChart";
 import MaterialDistributionChart from "../components/Charts/MaterialDistributionChart";
 
@@ -40,7 +40,7 @@ export default function OverViewPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await api.get(`metrics/overview/?months=${months}`);
+        const response = await getOverviewMetrics(months);
         setData(response.data);
         console.log(response.data);
       } catch (err) {
@@ -74,158 +74,75 @@ export default function OverViewPage() {
 
   return (
     <div className="">
-      {/* total status card */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ">
-        <StatusCard
-          title="Total Users"
-          number={data.Total_Users_section.total_users}
-          subTitle={data.Total_Users_section.today_active_users}
-          pathD={icons[0].pathD}
-          iconColor={icons[0].iconColor}
-          changeFromLastWeek={
-            data.Total_Users_section.users_change_from_last_week
-          }
-        />
-        <StatusCard
-          title="Active Partners"
-          number={data.Active_Partners_section.total_partners}
-          subTitle="All partners operational"
-          pathD={icons[1].pathD}
-          iconColor={icons[1].iconColor}
-          changeFromLastWeek={
-            data.Active_Partners_section.partners_change_from_last_week
-          }
-        />
-        <StatusCard
-          title="System Uptime"
-          number={data.System_Uptime_section.avg_system_uptime}
-          pathD={icons[2].pathD}
-          iconColor={icons[2].iconColor}
-          changeFromLastWeek={data.System_Uptime_section.analysis_period}
-        />
-        <StatusCard
-          title="Total Revenue"
-          number={data.Total_Revenue_section.total_revenue}
-          subTitle="This month"
-          pathD={icons[3].pathD}
-          iconColor={icons[3].iconColor}
-          changeFromLastWeek={
-            data.Total_Revenue_section.revenue_change_from_last_week
-          }
-        />
+      {/* Title Section */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
+        <p className="text-gray-600 mt-1">Real-time insights into your RVM network operations</p>
       </div>
 
-      {/* User Engagement Card */}
-      <div className="mt-6 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <MetricsCard
-          title="User Engagement"
-          subTitle="Daily active users and engagement metrics"
-          activeUser={data.User_Engagement_section.daily_active_users}
-          avgPoint={data.User_Engagement_section.avg_session_duration}
-          totalPoints={data.User_Engagement_section.average_points_per_user}
-          engageScore={data.User_Engagement_section.engagement_score}
-        />
-
-        <AnalyticsCard
-          title="User Retention"
-          subTitle="User retention and loyalty metrics"
-        >
-          <div className="flex justify-between items-center mb-1">
-            <p className="text-base">Retention Rate</p>
-            <span className="text-lg text-primary-color font-semibold">
-              {data.User_Retention_section.retension_rate} %
-            </span>
+      {/* Status Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
+          <p className="text-gray-600 text-sm font-medium mb-3">Total Machines</p>
+          <h3 className="text-3xl font-bold text-gray-900 mb-2">1,247</h3>
+          <div className="flex items-center text-green-600 text-sm">
+            <span className="text-green-600 mr-1">↑</span>
+            <span className="font-medium">+12%</span>
           </div>
-          <progress
-            className="progress progress-neutral w-full"
-            value={data.User_Retention_section.retension_rate}
-            max="100"
-          ></progress>
-          <p className="text-gray-500 text-[12px] mt-2">
-            Based on {data.User_Retention_section.cohort_analysis_period} cohort
-            analysis
-          </p>
-        </AnalyticsCard>
+        </div>
+
+        <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
+          <p className="text-gray-600 text-sm font-medium mb-3">Active RVMs</p>
+          <h3 className="text-3xl font-bold text-gray-900 mb-2">1,089</h3>
+          <div className="flex items-center text-green-600 text-sm">
+            <span className="text-green-600 mr-1">↑</span>
+            <span className="font-medium">+8%</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
+          <p className="text-gray-600 text-sm font-medium mb-3">Total Transactions</p>
+          <h3 className="text-3xl font-bold text-gray-900 mb-2">45,892</h3>
+          <div className="flex items-center text-red-600 text-sm">
+            <span className="text-red-600 mr-1">↓</span>
+            <span className="font-medium">-3%</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
+          <p className="text-gray-600 text-sm font-medium mb-3">Material Collected</p>
+          <h3 className="text-3xl font-bold text-gray-900 mb-2">12.5T</h3>
+          <div className="flex items-center text-green-600 text-sm">
+            <span className="text-green-600 mr-1">↑</span>
+            <span className="font-medium">+24%</span>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-6 mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <AnalyticsCard
-          title="Network Performance"
-          subTitle="Daily recycling volume and revenue trends"
-        >
-          <div className="flex gap-4 mb-4">
-            <button
-              onClick={() => setMonths(6)}
-              className={`px-3 py-1 cursor-pointer rounded ${
-                months === 6 ? "bg-primary-color  text-white" : "bg-gray-200"
-              }`}
-            >
-              Last 6 Months
-            </button>
-            <button
-              onClick={() => setMonths(12)}
-              className={`px-3 py-1 cursor-pointer rounded ${
-                months === 12 ? "bg-primary-color  text-white" : "bg-gray-200"
-              }`}
-            >
-              Last 12 Months
-            </button>
-          </div>
-
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Transaction Trends */}
+        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Transaction Trends</h3>
           {data && data.Network_Performance_section ? (
             <NetworkPerformanceChart
               performanceData={data.Network_Performance_section}
             />
           ) : (
-            <p>No data provided</p>
+            <p className="text-gray-500">Loading chart data...</p>
           )}
-        </AnalyticsCard>
+        </div>
 
-        <AnalyticsCard
-          title="Material Distribution"
-          subTitle="Breakdown by material type"
-        >
-          <div className="flex gap-4 mb-4">
-            <button
-              onClick={() => setMonths(6)}
-              className={`px-3 py-1 cursor-pointer rounded ${
-                months === 6 ? "bg-primary-color text-white" : "bg-gray-200"
-              }`}
-            >
-              Last 6 Months
-            </button>
-            <button
-              onClick={() => setMonths(12)}
-              className={`px-3 py-1 cursor-pointer rounded ${
-                months === 12 ? "bg-primary-color text-white" : "bg-gray-200"
-              }`}
-            >
-              Last 12 Months
-            </button>
-          </div>
-
+        {/* Material Mix */}
+        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Material Mix</h3>
           {data && data.Material_Distribution_section ? (
             <MaterialDistributionChart
               material_distribution_data={data.Material_Distribution_section}
             />
           ) : (
-            <p>No data available for material distribution.</p>
+            <p className="text-gray-500">Loading chart data...</p>
           )}
-        </AnalyticsCard>
-      </div>
-
-      <div className="mt-6 card bg-base-100 shadow-sm ">
-        <div className="card-body">
-          <div className="pb-2">
-            <h2 className="font-medium text-xl mb-2">Recent Alerts</h2>
-            <p className="text-gray-500">
-              Latest system notifications and alerts
-            </p>
-          </div>
-          <div className="grid grid-cols-1 gap-4">
-            <AlertCard machine="Cairo - Maadi" condition="medium" />
-            <AlertCard machine="Cairo - 10th Of Ramdan" condition="low" />
-          </div>
         </div>
       </div>
     </div>

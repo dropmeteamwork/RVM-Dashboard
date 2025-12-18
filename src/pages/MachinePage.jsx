@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
 import MachineCard from "../components/MachineCard";
-import axios from "axios";
-import api from "../services/api";
+import { getMachineMetrics } from "../services/api";
 
 export default function MachinePage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("machines");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredMachines, setFilteredMachines] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get("metrics/machines/");
+        const response = await getMachineMetrics();
         setData(response.data);
         console.log(response.data);
       } catch (err) {
@@ -26,6 +28,15 @@ export default function MachinePage() {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (data) {
+      const filtered = data.filter((machine) =>
+        machine.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredMachines(filtered);
+    }
+  }, [searchTerm, data]);
 
   if (loading) {
     return (
@@ -44,32 +55,136 @@ export default function MachinePage() {
   }
 
   return (
-    <>
-      <div className={`card bg-base-100 shadow-sm `}>
-        <div className="card-body">
-          <div className="pb-5">
-            <h2 className="font-semibold text-xl mb-2">Machine Status </h2>
-            <p className="text-gray-500">
-              Monitor and manage recycling machines
-            </p>
-          </div>
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 ">
-            {data.map((data, index) => (
-              <MachineCard
-                key={index}
-                name={data.name}
-                location={data.location_url}
-                totalCollected={data.total_collected}
-                dailyAvg={data.daily_average}
-                efficiency={data.efficiency}
-                status={data.status}
-                bottlesCapacity={data.bottles_capacity}
-                cansCapacity={data.cans_capacity}
-              />
-            ))}
-          </div>
+    <div>
+      {/* Header */}
+      <div className="mb-6 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Machine Management</h1>
+          <p className="text-gray-600 mt-1">Monitor RVM fleet health and performance</p>
         </div>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition">
+          Add Machine
+        </button>
       </div>
-    </>
+
+      {/* Tabs */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div className="flex border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab("machines")}
+            className={`flex-1 py-4 px-6 font-medium text-center transition ${
+              activeTab === "machines"
+                ? "text-gray-900 border-b-2 border-blue-600"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Machines
+          </button>
+          <button
+            onClick={() => setActiveTab("maintenance")}
+            className={`flex-1 py-4 px-6 font-medium text-center transition ${
+              activeTab === "maintenance"
+                ? "text-gray-900 border-b-2 border-blue-600"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Maintenance Logs
+          </button>
+        </div>
+
+        {/* Machines Tab */}
+        {activeTab === "machines" && (
+          <div className="p-6">
+            <div className="flex mb-6">
+              <input
+                type="search"
+                placeholder="Search machines..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Machines Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Machine ID</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Location</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Status</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Health</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Transactions</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Last Service</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredMachines.length > 0 ? (
+                    filteredMachines.map((machine, index) => (
+                      <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition">
+                        <td className="py-4 px-4 text-gray-900 font-medium">RVM-{String(index + 1).padStart(3, '0')}</td>
+                        <td className="py-4 px-4 text-gray-900">{machine.name}</td>
+                        <td className="py-4 px-4">
+                          <span className={`px-3 py-1 rounded text-sm font-medium ${
+                            machine.status === "Active" || machine.status === "active"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}>
+                            {machine.status}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-green-500 transition"
+                                style={{ width: `${Math.min(machine.efficiency, 100)}%` }}
+                              />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700">
+                              {Math.round(machine.efficiency)}%
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-gray-900">{machine.total_collected}</td>
+                        <td className="py-4 px-4 text-gray-600">2024-11-10</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="text-center py-8 text-gray-500">
+                        No machines found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Maintenance Logs Tab */}
+        {activeTab === "maintenance" && (
+          <div className="p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Maintenance Logs</h3>
+            <div className="space-y-4">
+              {filteredMachines.slice(0, 3).map((machine, index) => (
+                <div key={index} className="p-4 border border-gray-200 rounded-lg">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{machine.name}</h4>
+                      <p className="text-sm text-gray-600 mt-1">Last service: 2024-11-10</p>
+                    </div>
+                    <button className="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                      View Log
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

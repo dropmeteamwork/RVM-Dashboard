@@ -1,45 +1,20 @@
 import React, { useEffect, useState } from "react";
 import StatusCard from "../components/StatusCard";
 import AnalyticsCard from "../components/AnalyticsCard";
-import axios from "axios";
+import { getEnvironmentalMetrics } from "../services/api";
 import EnvironmentalImpactChart from "../components/Charts/EnvironmentalImpactChart";
-import api from "../services/api";
 
 export default function EnvironmentPage() {
-  const icons = [
-    {
-      pathD:
-        "M12 2C8.134 2 4 6.134 4 10c0 3.866 3.582 7 8 7s8-3.134 8-7c0-3.866-3.582-7-8-7zM6 10c0-2.577 2.686-5 6-5s6 2.423 6 5c0 2.577-2.686 5-6 5s-6-2.423-6-5z",
-      iconColor: "#7bab43",
-    },
-    {
-      pathD:
-        "M12 2C12 2 4 9.5 4 14.5C4 18.1 7.1 21 11 21C14.9 21 18 18.1 18 14.5C18 9.5 12 2 12 2Z",
-      iconColor: "#0ECCF6",
-    },
-    {
-      pathD:
-        "M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z",
-      iconColor: "purple",
-    },
-    {
-      pathD:
-        "M6.2 9.7 4.3 6.6l-.3.3a.996.996 0 1 1-1.4-1.4l1.8-1.8c.4-.4 1-.4 1.4 0l1.8 1.8a.996.996 0 1 1-1.4 1.4l-.3-.3 1.9 3.1c.3.5.1 1.1-.4 1.4s-1.1.1-1.4-.4zm11.3 3.6 1.9 3.1.3-.3a.996.996 0 1 1 1.4 1.4l-1.8 1.8c-.4.4-1 .4-1.4 0l-1.8-1.8a.996.996 0 1 1 1.4-1.4l.3.3-1.9-3.1c-.3-.5-.1-1.1.4-1.4s1.1-.1 1.4.4zM8.3 18h3.9v-1h-3.9l.7-.7a.996.996 0 1 0-1.4-1.4L5.8 18l1.8 1.8a.996.996 0 1 0 1.4-1.4l-.7-.7zm6.1-12h-3.9v1h3.9l-.7.7a.996.996 0 1 0 1.4 1.4l2.8-2.8-1.8-1.8a.996.996 0 1 0-1.4 1.4l.7.7z",
-      iconColor: "#FF6411",
-    },
-  ];
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [activeTab, setActiveTab] = useState("material-flow");
   const [months, setMonths] = useState(6);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get(
-          `metrics/environmental/?months=${months}`
-        );
+        const response = await getEnvironmentalMetrics(months);
         setData(response.data);
         console.log(response.data);
       } catch (err) {
@@ -70,88 +45,136 @@ export default function EnvironmentPage() {
       </div>
     );
   }
+
   return (
-    <div className="">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ">
-        <StatusCard
-          title="CO2 Emissions Saved"
-          number={`${data.env_info.co2_emissions_saved.toFixed(2)} Kg`}
-          subTitle="Network-wide impact"
-          pathD={icons[0].pathD}
-          iconColor={icons[0].iconColor}
-        />
-        <StatusCard
-          title="Water Conserved"
-          number={`${data.env_info.water_conserved.toFixed(2)} L`}
-          subTitle="Total water saved"
-          pathD={icons[1].pathD}
-          iconColor={icons[1].iconColor}
-        />
-        <StatusCard
-          title="Energy Saved"
-          number={`${data.env_info.energy_saved.toFixed(2)} kWh`}
-          subTitle="Energy conservation"
-          pathD={icons[2].pathD}
-          iconColor={icons[2].iconColor}
-        />
-        <StatusCard
-          title="Items Recycled"
-          number={data.env_info.total_recycled_items}
-          subTitle="Total items processed"
-          pathD={icons[3].pathD}
-          iconColor={icons[3].iconColor}
-        />
+    <div>
+      {/* Header */}
+      <div className="mb-6 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Environment & Sustainability</h1>
+          <p className="text-gray-600 mt-1">CSRD (ESRS E5) Compliance Reporting</p>
+        </div>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition">
+          ↓ Export CSRD Report
+        </button>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 items-start lg:grid-cols-2 gap-4">
-        <AnalyticsCard
-          title="Environmental Impact Trends"
-          subTitle="Monthly environmental impact metrics"
-        >
-          <div className="flex gap-4 mb-4">
-            <button
-              onClick={() => setMonths(6)}
-              className={`px-3 py-1 cursor-pointer rounded ${
-                months === 6 ? "bg-primary-color text-white" : "bg-gray-200"
-              }`}
-            >
-              Last 6 Months
-            </button>
-            <button
-              onClick={() => setMonths(12)}
-              className={`px-3 py-1 cursor-pointer rounded ${
-                months === 12 ? "bg-primary-color text-white" : "bg-gray-200"
-              }`}
-            >
-              Last 12 Months
-            </button>
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-gray-600 text-sm font-medium">Total Material Inflow (kg)</p>
+            <span className="text-2xl">📥</span>
           </div>
-          {data.monthly_env_impact ? (
-            <EnvironmentalImpactChart
-              monthly_env_impact={data.monthly_env_impact}
-            />
-          ) : (
-            <p>No monthly data available</p>
-          )}
-        </AnalyticsCard>
-        <AnalyticsCard
-          title="Carbon Footprint Redcution"
-          subTitle="Equivalent environmental benefits"
-        >
-          <div className="flex justify-between items-center mb-1">
-            <p className="text-base">Tree Equivalent </p>
-            <span className="text-lg text-primary-color font-semibold">
-              {data.env_info.trees_equivalent}
-            </span>
+          <h3 className="text-3xl font-bold text-gray-900">8,300</h3>
+          <p className="text-gray-500 text-xs mt-2">kg</p>
+        </div>
+
+        <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-gray-600 text-sm font-medium">Material Outflow (kg)</p>
+            <span className="text-2xl">📤</span>
           </div>
-          <div className="flex justify-between items-center mb-1">
-            <p className="text-base">Carbon Footprint Reduction </p>
-            <span className="text-lg text-orange-500 font-semibold">
-              {data.env_info.carbon_footprint_reduction_percentage} %
-            </span>
+          <h3 className="text-3xl font-bold text-gray-900">6,350</h3>
+          <p className="text-gray-500 text-xs mt-2">kg</p>
+        </div>
+
+        <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-gray-600 text-sm font-medium">Recycling Rate</p>
+            <span className="text-2xl">♻️</span>
           </div>
-        </AnalyticsCard>
+          <h3 className="text-3xl font-bold text-gray-900">94.2%</h3>
+          <p className="text-gray-500 text-xs mt-2">%</p>
+        </div>
+
+        <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-gray-600 text-sm font-medium">Carbon Offset (kg CO₂)</p>
+            <span className="text-2xl">🌍</span>
+          </div>
+          <h3 className="text-3xl font-bold text-gray-900">2,145</h3>
+          <p className="text-gray-500 text-xs mt-2">kg</p>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div className="flex border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab("material-flow")}
+            className={`flex-1 py-4 px-6 font-medium text-center transition ${
+              activeTab === "material-flow"
+                ? "text-gray-900 border-b-2 border-blue-600"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Material Flow
+          </button>
+          <button
+            onClick={() => setActiveTab("recycler-partners")}
+            className={`flex-1 py-4 px-6 font-medium text-center transition ${
+              activeTab === "recycler-partners"
+                ? "text-gray-900 border-b-2 border-blue-600"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Recycler Partners
+          </button>
+          <button
+            onClick={() => setActiveTab("product-passport")}
+            className={`flex-1 py-4 px-6 font-medium text-center transition ${
+              activeTab === "product-passport"
+                ? "text-gray-900 border-b-2 border-blue-600"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Digital Product Passport
+          </button>
+        </div>
+
+        {/* Material Flow Tab */}
+        {activeTab === "material-flow" && (
+          <div className="p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Material Inflow/Outflow Tracking</h3>
+            {data.monthly_env_impact ? (
+              <EnvironmentalImpactChart
+                monthly_env_impact={data.monthly_env_impact}
+              />
+            ) : (
+              <p className="text-gray-500">No data available</p>
+            )}
+          </div>
+        )}
+
+        {/* Recycler Partners Tab */}
+        {activeTab === "recycler-partners" && (
+          <div className="p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Partner Network</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-semibold text-gray-900 mb-2">Active Partners</h4>
+                <p className="text-3xl font-bold text-blue-600">24</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-semibold text-gray-900 mb-2">Total Processing Capacity</h4>
+                <p className="text-3xl font-bold text-green-600">15.2T/month</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Digital Product Passport Tab */}
+        {activeTab === "product-passport" && (
+          <div className="p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Digital Product Passport</h3>
+            <div className="bg-gray-50 rounded-lg p-6 text-center">
+              <p className="text-gray-600">Digital Product Passport tracking coming soon</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
