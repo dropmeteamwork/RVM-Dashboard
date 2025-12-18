@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import AnalyticsCard from "../components/AnalyticsCard";
 import UserCard from "../components/UserCard";
 import { getUserAnalytics } from "../services/api";
-import UserRetentionChart from "../components/Charts/UserRetentionChart";
 
 export default function UserPage({ className }) {
   const [data, setData] = useState(null);
@@ -11,6 +10,8 @@ export default function UserPage({ className }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("users");
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +38,7 @@ export default function UserPage({ className }) {
         user.username.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredUsers(filtered);
+      setCurrentPage(1); // Reset to first page when search changes
     }
   }, [searchTerm, data]);
 
@@ -122,31 +124,33 @@ export default function UserPage({ className }) {
                 </thead>
                 <tbody>
                   {filteredUsers.length > 0 ? (
-                    filteredUsers.map((user, index) => (
-                      <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition">
-                        <td className="py-4 px-4 text-gray-900">{user.email}</td>
-                        <td className="py-4 px-4 text-gray-900">{user.username}</td>
-                        <td className="py-4 px-4">
-                          <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm font-medium">
-                            User
-                          </span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className={`px-3 py-1 rounded text-sm font-medium ${
-                            user.active
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-700"
-                          }`}>
-                            {user.active ? "Active" : "Inactive"}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 text-gray-600">{user.joined}</td>
-                        <td className="py-4 px-4 flex gap-2">
-                          <button className="text-blue-600 hover:text-blue-800 transition">✏️</button>
-                          <button className="text-red-600 hover:text-red-800 transition">🗑️</button>
-                        </td>
-                      </tr>
-                    ))
+                    filteredUsers
+                      .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                      .map((user, index) => (
+                        <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 transition">
+                          <td className="py-4 px-4 text-gray-900">{user.email}</td>
+                          <td className="py-4 px-4 text-gray-900">{user.username}</td>
+                          <td className="py-4 px-4">
+                            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm font-medium">
+                              User
+                            </span>
+                          </td>
+                          <td className="py-4 px-4">
+                            <span className={`px-3 py-1 rounded text-sm font-medium ${
+                              user.active
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-700"
+                            }`}>
+                              {user.active ? "Active" : "Inactive"}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4 text-gray-600">{user.joined}</td>
+                          <td className="py-4 px-4 flex gap-2">
+                            <button className="text-blue-600 hover:text-blue-800 transition">✏️</button>
+                            <button className="text-red-600 hover:text-red-800 transition">🗑️</button>
+                          </td>
+                        </tr>
+                      ))
                   ) : (
                     <tr>
                       <td colSpan="6" className="text-center py-8 text-gray-500">
@@ -157,6 +161,46 @@ export default function UserPage({ className }) {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination */}
+            {filteredUsers.length > 0 && (
+              <div className="flex items-center justify-between mt-6">
+                <p className="text-sm text-gray-600">
+                  Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredUsers.length)} of {filteredUsers.length} users
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    ← Previous
+                  </button>
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: Math.ceil(filteredUsers.length / itemsPerPage) }).map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentPage(idx + 1)}
+                        className={`px-3 py-2 rounded-lg font-medium transition ${
+                          currentPage === idx + 1
+                            ? "bg-blue-600 text-white"
+                            : "border border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        {idx + 1}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setCurrentPage(Math.min(Math.ceil(filteredUsers.length / itemsPerPage), currentPage + 1))}
+                    disabled={currentPage === Math.ceil(filteredUsers.length / itemsPerPage)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    Next →
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

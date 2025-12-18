@@ -5,6 +5,7 @@ import SecondaryNav from "./components/SecondaryNav";
 import OverViewPage from "./pages/OverViewPage";
 import EnvironmentPage from "./pages/EnvironmentPage";
 import UserPage from "./pages/UserPage";
+import UserAnalyticsPage from "./pages/UserAnalyticsPage";
 import MachinePage from "./pages/MachinePage";
 import AiPerformancePage from "./pages/AiPerformancePage";
 import TransactionPage from "./pages/TransactionPage";
@@ -59,6 +60,7 @@ export default function App() {
         <Route path="overview" element={<OverViewPage />} />
         <Route path="environment" element={<EnvironmentPage />} />
         <Route path="users" element={<UserPage />} />
+        <Route path="users-analytics" element={<UserAnalyticsPage />} />
         <Route path="machines" element={<MachinePage />} />
         <Route path="analytics" element={<AnalyticsPage />} />
         <Route path="transaction" element={<TransactionPage />} />

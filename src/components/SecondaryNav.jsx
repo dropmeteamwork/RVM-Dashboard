@@ -56,6 +56,11 @@ export default function SecondaryNav() {
             <span className="truncate">Users</span>
           </NavLink>
 
+          <NavLink to="/app/users-analytics" end className={({ isActive }) => getNavLinkClasses(isActive)}>
+            <SvgIcon pathD={iconPaths.analytics} className="size-5 flex-shrink-0" />
+            <span className="truncate">User Analytics</span>
+          </NavLink>
+
           <NavLink to="/app/machines" end className={({ isActive }) => getNavLinkClasses(isActive)}>
             <SvgIcon pathD={iconPaths.machines} className="size-5 flex-shrink-0" />
             <span className="truncate">Machines</span>
